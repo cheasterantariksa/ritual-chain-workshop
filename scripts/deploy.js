@@ -1,6 +1,5 @@
 import { createWalletClient, createPublicClient, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { readFileSync } from "fs";
 import { createRequire } from "module";
 import "dotenv/config";
 
@@ -31,15 +30,22 @@ async function main() {
   console.log("Deploying PrivacyBounty...");
   console.log("Deployer:", account.address);
 
+  // Get nonce terbaru
+  const nonce = await publicClient.getTransactionCount({
+    address: account.address,
+  });
+  console.log("Nonce:", nonce);
+
   const hash = await walletClient.deployContract({
     abi: artifact.abi,
     bytecode: artifact.bytecode,
     args: [],
+    nonce: nonce,
   });
 
   console.log("TX hash:", hash);
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
-  console.log("Deployed to:", receipt.contractAddress);
+  console.log("✅ Deployed to:", receipt.contractAddress);
 }
 
 main().catch(console.error);
